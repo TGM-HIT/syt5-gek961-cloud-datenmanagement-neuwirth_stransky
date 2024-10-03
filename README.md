@@ -24,6 +24,9 @@ Der Benutzer soll sich mit seiner ID und seinem Passwort entsprechend einloggen 
 /auth/verify gibt ein 403 UNAUTHORIZEDzurück, wenn das mitgelieferte JWT nicht der Signatur entspricht. Ansonsten wird eine positive Rückmeldung generiert und die Rolle bestätigt.
 Verwenden Sie auf jeden Fall ein gängiges Build-Management-Tool (z.B. Gradle). Dabei ist zu beachten, dass ein einfaches Deployment möglich ist (auch Datenbank mit z.B. file-based DBMS). Überprüfen Sie die Funktionalität mit einfachen Methoden, die einfach nachvollziehbar sind und dokumentieren Sie diese (z.B. mit curl Befehlen).
 
+### Umsetzung:
+Wir haben einen Docker-Container mit folgender Datenbank erstellt:
 
+![img.png](img.png)
 
 
