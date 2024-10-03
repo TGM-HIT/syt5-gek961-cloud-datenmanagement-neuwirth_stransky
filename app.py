@@ -1,5 +1,6 @@
 # Importieren von Flask, mysql.connector und hashlib
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 import mysql.connector
 import hashlib
 
@@ -7,13 +8,17 @@ import hashlib
 app = Flask(__name__, template_folder='../templates')
 app.secret_key = 'geheimnisvollesgeheimnis'
 
+# JWT secret key for JWT management
+app.config['JWT_SECRET_KEY'] = 'jwt_geheimnisvoll'
+jwt = JWTManager(app)
+
 # MySQL-Konfiguration
 db_config = {
     'host': 'localhost',
-    'port': 8080,
+    'port': 3306,
     'user': 'root',
     'password': 'Password12345!',
-    'database': 'login'
+    'database': 'accounts'
 }
 #Die verbindung zur Datenbank wird hergestellt
 conn = mysql.connector.connect(**db_config)
@@ -33,68 +38,66 @@ def check_password(stored_hash, password_to_check):
 def index():
     if 'username' in session:     
         return render_template('index.html', username=session['username'])
-    return redirect(url_for('auth/signin'))
+    return redirect(url_for('signin'))
 
 #die Methode wir bei /register aufgerufen
-@app.route('/auth/register', methods=['GET', 'POST'])
+# Registrierung nur durch Administratoren
+@app.route('/auth/admin/register', methods=['POST'])
+@jwt_required()  # Nur angemeldete Benutzer können Benutzer registrieren
 def register():
-    #Überprüft ob die POST-Methode requestet ist
-    if request.method == 'POST':
-        username = request.form['username']
-        role = request.form['role']
+    # Hole den angemeldeten Benutzer
+    current_user = get_jwt_identity()
+    if current_user['role'] != 'ADMIN':
+        return jsonify({'msg': 'Nur Administratoren können Benutzer registrieren!'}), 403
 
-        if (role != "ADMIN" and role != "READER" and role != "MODERATOR"):
-            role = "READER"
+    email = request.json.get('email')
+    password = request.json.get('password')
+    role = request.json.get('role', 'READER')
 
-        # Hash and salt the password
-        raw_password = request.form['password'] + "1KASmdfsjeWiud/§"
-        hashed_password = hash_password(raw_password)
+    # Überprüfen ob Role gültig ist
+    if role not in ["ADMIN", "READER", "MODERATOR"]:
+        role = "READER"
 
-        #Überprüft ob es den user schon gibt
-        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-        existing_user = cursor.fetchone()
+    # Hash and salt the password
+    raw_password = request.form['password'] + "1KASmdfsjeWiud/§"
+    hashed_password = hash_password(raw_password)
 
-        if existing_user:
-            return "Benutzername bereits vorhanden. Bitte wählen Sie einen anderen Benutzernamen."
-        else:
-            #Wenn es den User noch nicht gibt --> füge ein neues username, password paar hinzu
-            cursor.execute("INSERT INTO users (username, password, role) VALUES (%s, %s, %s)",(username, hashed_password, role))
-            conn.commit()
-            return "Erfolgreich registriert!"
-    #So lange nicht POST sondern GET verlangt wird, wird nur die normale webseite angezeigt
-    return render_template('register.html')
+    # Überprüfen, ob der Benutzer bereits existiert
+    cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+    existing_user = cursor.fetchone()
 
-#Diese methode wird aufgerufen, wenn /login in der URL steht
-@app.route('auth/signin', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        raw_password = request.form['password'] + "1KASmdfsjeWiud/§"
+    if existing_user:
+        return jsonify({'msg': 'E-Mail existiert bereits!'}), 400
+    else:
+        # Benutzer registrieren
+        cursor.execute("INSERT INTO users (email, password, role) VALUES (%s, %s, %s)",
+                       (email, hashed_password, role))
+        conn.commit()
+        return jsonify({'msg': 'Benutzer erfolgreich registriert!'}), 201
 
-        #Ich hole mir die Daten zum richtigen Username
-        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-        user = cursor.fetchone()
+# Login und JWT-Erstellung
+@app.route('/auth/signin', methods=['POST'])
+def signin():
+    email = request.json.get('email')
+    password = request.json.get('password') + "1KASmdfsjeWiud/§"
 
-        #Überprüfung ob der user exsitiert und das passwort übereinstimmt
-        if user and check_password(user[2], raw_password): 
-            #Ich erstelle 2. Sessions damit ich nicht immer den Server nach dem
-            #Passwort und Userfragen muss; Damit ist der login_status auf true
-            #und den username wurde auch gespeichert
-            session['logged_in'] = True
-            session['username'] = username
-            #es geht auf die index-seite
-            return redirect(url_for('index'))
-        else:
-            return "Falsche Anmeldeinformationen. Bitte versuchen Sie es erneut."
-    #So lange nicht POST sondern GET verlangt wird, wird nur die normale webseite angezeigt
-    return render_template('signin.html')
+    # Benutzer anhand der E-Mail abrufen
+    cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+    user = cursor.fetchone()
 
-#Wenn man auf Logout geht werden die Sessions gelöscht und man ist nicht mehr angemeldet
-@app.route('/logout')
-def logout():
-    session.pop('username', None)
-    session.pop('logged_in', None)
-    return redirect(url_for('login'))
+    if user and check_password(user[3], password):  # Passwort überprüfen (user[3] ist das Passwort)
+        # JWT erstellen
+        access_token = create_access_token(identity={'username': user[1], 'role': user[4]})
+        return jsonify({'access_token': access_token}), 200
+    else:
+        return jsonify({'msg': 'Falsche Anmeldeinformationen!'}), 401
+
+# JWT-Verifizierung
+@app.route('/auth/verify', methods=['GET'])
+@jwt_required()  # JWT wird benötigt
+def verify():
+    current_user = get_jwt_identity()  # Hole die Identität aus dem JWT
+    return jsonify({'msg': 'Token gültig!', 'user': current_user}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
