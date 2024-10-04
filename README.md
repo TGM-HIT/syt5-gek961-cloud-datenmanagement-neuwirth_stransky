@@ -116,14 +116,41 @@ current_user = get_jwt_identity()
 
 ```
 #### Fazit
-Das Einrichten, wie auch verwenden eines gemeinsamen Git-Repos hat uns aufgehalten.
-Außerdem wir mit der Verbindung zum Docker viel Zeit verloren.
-Wir haben viel Zeit verloren, da wir die ganze Aufgabe mit einem Web-Interface umsetzen wollte --> siehe templates Ordner.
+
+Wir hatten diese Probleme und Hindernisse bei der Implementierung der Aufgabe:
+
+Die Einrichtung des Git-Repositories hat unerwartet viel Zeit in Anspruch genommen. 
+Dabei traten insbesondere beim Push-Vorgang Probleme auf, da Visual Studio Code im Vergleich zu Git Bash und Git Desktop nicht alle Fehlermeldungen vollständig anzeigt. 
+Das zentrale Problem lag in der aktivierten GitHub-Einstellung "keep my email private". 
+Nachdem die user.email-Konfiguration in Git auf die private E-Mail-Adresse umgestellt wurde, war es nicht mehr möglich, Änderungen zu pushen.
+Zeitweise befanden wir uns auch nicht am gleichen Branch und mussten die Änderungen zusammenführen.
+
+Außerdem hat die Verbindung zum Docker Container nicht funktioniert, da die config falsch war.
+Nachdem wir den richtigen Port exposed haben, konnten wir die Datenbank erstellen und die Datenbankverbindung herstellen.
+
+Wir haben bereits die Woche zuvor versucht, die Aufgabe zu lösen und haben dabei die noch nicht abgeänderte Angabe verwendet.
+Deshalb haben wir Sessions verwendet und ein Web-Interface erstellt.
+Da wir zu diesem Zeitpunkt noch nicht den genauen Ablauf einer Middleware Einheit kannten.
+
+Daraufhin haben wir die Aufgabe abgeändert und den JWT implementiert.
+Jedoch hatten wir dann leider nicht genug Zeit diese zu testen und in Docker zu deployen.
 
 Wir konnten am Schluss unser Program aufgrund diverser Fehler nicht testen:
+Der resultierende Fehler war ein `method not allowed` Fehler, der auftrat.
 
+Was wir uns für die Zukunft merken sollten:
+Generell ist es wichtig die Aufgabe in einer bereits bekannten Umgebung zu lösen und zu implementieren.
+Da man sich dann auf die Implementierung der Aufgabe konzentrieren kann und nicht herausfinden muss wie die Umgebung funktioniert.
 
+Falls beim commiten oder pushen Fehler auftreten ist es grundsätzlich immer ratsam die genaue Fehlermeldung im git bash zu überprüfen.
+Da dort meist schon Lösungsansätze angezeigt werden und die Fehlerbehebung um einiges beschleunigt wird.
+Eine andere Option ist es gleich eine Mischung aus git bash und Github Desktop zu verwenden.
 
+In Stichworten haben wir folgendes gelernt:
+- Hashen von Passwörtern
+- Verwendung von JWT
+- Umgang mit REST
+- Grundlegendes Arbeiten mit Flask
 
 ## Fragestellungen
 
