@@ -126,9 +126,9 @@ client-server-Trennung: klare Rollentrennung zwischen Datenanfrage und Datenausl
 
 Zustandslosigkeit: Jede Anfrage enthält nur die Daten die zu dem Verständnis und damit auch der Ausfürhung nötig sind
 
-Caching: Ein weiteres Kennzeichen von REST ist die Möglichkeit der Zwischenspeicherung (Caching) von Daten. Diese werden explizit als „cacheable“ oder „non-cacheable“ gekennzeichnet, je nach erfolgter Auswahl zwischengespeichert und bei identischer Anfrage erneut verwendet.
+Einheitliche Schnittstelle: Alle Anfragen müssen ein einheitliches Format aufweisen 
 
-Einheitliche Schnittstelle:  Alle Anfragen müssen ein einheitliches Format aufweisen 
+Alle Daten müssen in JOSN gespeicher werden
 
 #### Wie stehen diese mit den HTTP-Befehlen in Verbindung?
 Die Informationen werden als Hypertext Transfer Protocol (HTTP) bereitgestellt. Dabei gibt es folgende HTTP-Befehle um HTTP-Anfragen mit einer RESTful-API durchzuführen:
@@ -159,6 +159,7 @@ Erstens ist die Sicherheit entscheidend, einschließlich Authentifizierung, Auto
 ## Quellen:
 
 + "REST-API verständlich erklärt für Nicht-Entwickler" https://www.lobster-world.com/de/wiki/rest-api/ 
++ "REST" https://www.talend.com/de/resources/was-ist-rest-api/
 + "Flask Doku" https://flask-session.readthedocs.io/en/latest
 + "Hashlib" https://docs.python.org/3/library/hashlib.html
 + "Docker" https://www.datacamp.com/tutorial/set-up-and-configure-mysql-in-docker
