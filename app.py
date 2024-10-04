@@ -1,10 +1,10 @@
 # Importieren von Flask, mysql.connector und hashlib
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 import mysql.connector
 import hashlib
 
-#Stellt sicher, dass der templates folder wirklich gefunden wurde
+# Flask-App initialisieren
 app = Flask(__name__, template_folder='../templates')
 app.secret_key = 'geheimnisvollesgeheimnis'
 
@@ -15,12 +15,13 @@ jwt = JWTManager(app)
 # MySQL-Konfiguration
 db_config = {
     'host': 'localhost',
-    'port': 3306,
+    'port': 8080,
     'user': 'root',
     'password': 'Password12345!',
-    'database': 'accounts'
+    'database': 'login'
 }
-#Die verbindung zur Datenbank wird hergestellt
+
+# Verbindung zur Datenbank herstellen
 conn = mysql.connector.connect(**db_config)
 cursor = conn.cursor()
 
@@ -32,21 +33,20 @@ def hash_password(password):
 def check_password(stored_hash, password_to_check):
     return stored_hash == hash_password(password_to_check)
 
-#Folgender Rest-Befehl und die dazugehörige Methode sollen 
-#den User standartmäßig auf /login führen
+# Hauptseite (Index), überprüft JWT statt Session
 @app.route('/')
+@jwt_required(optional=True)  # Optionales JWT, falls der User nicht eingeloggt ist
 def index():
-    if 'username' in session:     
-        return render_template('index.html', username=session['username'])
+    current_user = get_jwt_identity()  # Identität aus dem JWT abrufen
+    if current_user:
+        return render_template('index.html', username=current_user['username'])
     return redirect(url_for('signin'))
 
-#die Methode wir bei /register aufgerufen
-# Registrierung nur durch Administratoren
+# Registrierung (nur Administratoren können Benutzer registrieren)
 @app.route('/auth/admin/register', methods=['POST'])
-@jwt_required()  # Nur angemeldete Benutzer können Benutzer registrieren
+@jwt_required()  # Nur eingeloggte Benutzer können Benutzer registrieren
 def register():
-    # Hole den angemeldeten Benutzer
-    current_user = get_jwt_identity()
+    current_user = get_jwt_identity()  # Hole die Identität aus dem JWT
     if current_user['role'] != 'ADMIN':
         return jsonify({'msg': 'Nur Administratoren können Benutzer registrieren!'}), 403
 
@@ -54,12 +54,12 @@ def register():
     password = request.json.get('password')
     role = request.json.get('role', 'READER')
 
-    # Überprüfen ob Role gültig ist
+    # Überprüfen, ob Role gültig ist
     if role not in ["ADMIN", "READER", "MODERATOR"]:
         role = "READER"
 
-    # Hash and salt the password
-    raw_password = request.form['password'] + "1KASmdfsjeWiud/§"
+    # Passwort mit Salt hashen
+    raw_password = password + "1KASmdfsjeWiud/§"
     hashed_password = hash_password(raw_password)
 
     # Überprüfen, ob der Benutzer bereits existiert
@@ -85,9 +85,9 @@ def signin():
     cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
     user = cursor.fetchone()
 
-    if user and check_password(user[3], password):  # Passwort überprüfen (user[3] ist das Passwort)
+    if user and check_password(user[2], password):  # Passwort überprüfen (user[2] ist das Passwort)
         # JWT erstellen
-        access_token = create_access_token(identity={'username': user[1], 'role': user[4]})
+        access_token = create_access_token(identity={'username': user[1], 'role': user[3]})
         return jsonify({'access_token': access_token}), 200
     else:
         return jsonify({'msg': 'Falsche Anmeldeinformationen!'}), 401

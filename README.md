@@ -45,7 +45,12 @@ Wir haben den falschen Prot expost
 Wir haben einen Docker-Container mit folgender Datenbank erstellt:
 
 ```sql
-
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(255) NOT NULL
+);
 ```
 
 Um das Passwort nicht einfach plain in unsere Datenbank zu schreiben haben wir es mithilfe von hashlib gehasht:
@@ -111,10 +116,13 @@ current_user = get_jwt_identity()
 
 ```
 #### Fazit
+Das Einrichten, wie auch verwenden eines gemeinsamen Git-Repos hat uns aufgehalten.
+Außerdem wir mit der Verbindung zum Docker viel Zeit verloren.
+Wir haben viel Zeit verloren, da wir die ganze Aufgabe mit einem Web-Interface umsetzen wollte --> siehe templates Ordner.
+
 Wir konnten am Schluss unser Program aufgrund diverser Fehler nicht testen:
 
-Wir haben viel Zeit verloren, da wir die ganze Aufgabe mit einem Web-Interface umsetzen wollte --> siehe templates Ordner.
-Außerdem Haben wir für mit der Verbindung zum Docker viel Zeit verloren und das Einrichten, wie auch verwenden eines gemeinsamen Git-Repos hat uns aufgehalten.
+
 
 
 ## Fragestellungen
@@ -154,7 +162,9 @@ Die Sicherheit der Daten muss gewähleistet werden
 #### Verschiedene Frameworks bieten schnelle Umsetzungsmöglichkeiten, welche Eckpunkte müssen jedoch bei einer öffentlichen Bereitstellung (Production) von solchen Services beachtet werden?
 
 Ein der öffentlichen Bereitstellung von Services auf verschiedenen Frameworks sollten folgende Punkte beachtet werden: 
-Erstens ist die Sicherheit entscheidend, einschließlich Authentifizierung, Autorisierung und Datenverschlüsselung. Zweitens muss die Leistung durch Caching und Skalierbarkeit optimiert werden. Drittens ist die Verfügbarkeit wichtig, was regelmäßige Backups und Monitoring umfasst. Die Einhaltung von Datenschutzbestimmungen wie der DSGVO ist unerlässlich. Zudem sollte eine klare Dokumentation bereitgestellt werden, und ein Plan für Wartung und Support ist notwendig, um die Stabilität der Services zu gewährleisten.
+Erstens ist die Sicherheit entscheidend, einschließlich Authentifizierung, Autorisierung und Datenverschlüsselung. Außerdem ist die Verfügbarkeit wichtig, was regelmäßige Backups und Monitoring umfasst. 
+Da man hier mit User-Daten arbeitet, ist die Einhaltung von Datenschutzbestimmungen wie der DSGVO ist wichtig. 
+Zudem sollte eine klare Dokumentation bereitgestellt werden, um eine gut Wartung des System zu gewährleisten.
 
 ## Quellen:
 
