@@ -25,9 +25,97 @@ Der Benutzer soll sich mit seiner ID und seinem Passwort entsprechend einloggen 
 Verwenden Sie auf jeden Fall ein gängiges Build-Management-Tool (z.B. Gradle). Dabei ist zu beachten, dass ein einfaches Deployment möglich ist (auch Datenbank mit z.B. file-based DBMS). Überprüfen Sie die Funktionalität mit einfachen Methoden, die einfach nachvollziehbar sind und dokumentieren Sie diese (z.B. mit curl Befehlen).
 
 ## Umsetzung:
+Konektivität zu unserer Daten bank:
+```python
+# MySQL-Konfiguration
+db_config = {
+    'host': 'localhost',
+    'port': 3306,
+    'user': 'root',
+    'password': 'Password12345!',
+    'database': 'accounts'
+}
+#Die verbindung zur Datenbank wird hergestellt
+conn = mysql.connector.connect(**db_config)
+cursor = conn.cursor()
+```
+An dieser Stelle sind wir für eine Zeit stecken geblieben, da wir ben Docker-Container falsch konfiguriert hatten:
+Wir haben den falschen Prot expost
+
 Wir haben einen Docker-Container mit folgender Datenbank erstellt:
 
-![img.png](img.png)
+```sql
+
+```
+
+Um das Passwort nicht einfach plain in unsere Datenbank zu schreiben haben wir es mithilfe von hashlib gehasht:
+
+```python
+# Erstelle einen Hash des Passworts mit SHA-256
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+# Hash das zu überprüfende Passwort
+def check_password(stored_hash, password_to_check):
+    return stored_hash == hash_password(password_to_check)
+
+#In der Methode registrate haben wir die methode mit folgedenem Befehl aufgerufen:
+
+raw_password = request.form['password'] + "1KASmdfsjeWiud/§"
+hashed_password = hash_password(raw_password)
+```
+
+Wir haben probiert die Aufgabe schon eine Woche vorher zu lössen, deswegen haben wir eine session verwendet:
+
+```python
+@app.route('/')
+def index():
+    if 'username' in session:     
+        return render_template('index.html', username=session['username'])
+
+#in der Methode login:
+session['logged_in'] = True
+session['username'] = username
+
+#in der Methode ausloggen:
+session.pop('username', None)
+session.pop('logged_in', None)
+```
+Diese Umsetzung hat funktioniert, aber wir konnten sie im labor nicht verwenden.
+
+#### JWT
+
+Für die Umsetzung dieser Aufgabe haben wir den JOSN-Web-Token verwendet. Ein JSON Web Token (JWT) ist ein standardisiertes Access Token nach RFC 7519. 
+Es ermöglicht den sicheren Datenaustausch zwischen zwei Parteien, da es alle relevanten Informationen über eine Entität enthält. Daher muss nicht die ganze Zeit die Datenbank abgefragt werden.
+
+```python
+# der gehiem JWT schlüssel 
+app.config['JWT_SECRET_KEY'] = 'jwt_geheimnisvoll'
+jwt = JWTManager(app)
+
+#Beim login wir ein JWT vergeben
+if user and check_password(user[3], password):  # Passwort überprüfen (user[3] ist das Passwort)
+    # JWT erstellen
+    access_token = create_access_token(identity={'username': user[1], 'role': user[4]})
+    return jsonify({'access_token': access_token}), 200
+
+#In verfiy wird der gültige jwt abgefragt
+def verify():
+    current_user = get_jwt_identity()  # Hole die Identität aus dem JWT
+    return jsonify({'msg': 'Token gültig!', 'user': current_user}), 200
+
+#In registrate wird auch der JWT abgefragt um die Rolle es angemeldeten Benutzers zu überprüfen:
+current_user = get_jwt_identity()
+    if current_user['role'] != 'ADMIN':
+        return jsonify({'msg': 'Nur Administratoren können Benutzer registrieren!'}), 403
+
+```
+#### Fazit
+Wir konnten am Schluss unser Program aufgrund diverser Fehler nicht testen:
+
+Wir haben viel Zeit verloren, da wir die ganze Aufgabe mit einem Web-Interface umsetzen wollte --> siehe templates Ordner.
+Außerdem Haben wir für mit der Verbindung zum Docker viel Zeit verloren und das Einrichten, wie auch verwenden eines gemeinsamen Git-Repos hat uns aufgehalten.
+
 
 ## Fragestellungen
 
