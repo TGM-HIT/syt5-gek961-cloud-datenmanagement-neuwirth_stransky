@@ -1,0 +1,22 @@
+{
+    "users": [
+        {
+            "email": "admin@example.com",
+            "password": "adminpass",
+            "role": "ADMIN",
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTczMDQwMDQ2NSwianRpIjoiNzU4ZGVhZGItZTE0YS00OWYzLThjZjQtOThkNDg1YWVkNTNiIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ1c2VybmFtZSI6ImFkbWluQGV4YW1wbGUuY29tIiwicm9sZSI6IkFETUlOIn0sIm5iZiI6MTczMDQwMDQ2NSwiY3NyZiI6ImUyNjIyMjk4LWM1YTgtNGY1Mi1hY2E4LWNlZGRjNjMyNDcxZiIsImV4cCI6MTczMDQwMTM2NX0.tFERcEzxrugBaxeK4hHt8OKYFaqgsbePIzHnnbHYAAw"
+        },
+        {
+            "email": "newuser@example.com",
+            "password": "newuserpassword",
+            "role": "READER",
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTczMDQwMDQ4MSwianRpIjoiNGM5MzYzOTQtOGI4YS00ZmE1LWE5ZjUtMmI2NzdlNGNkNzQ1IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ1c2VybmFtZSI6Im5ld3VzZXJAZXhhbXBsZS5jb20iLCJyb2xlIjoiUkVBREVSIn0sIm5iZiI6MTczMDQwMDQ4MSwiY3NyZiI6ImEzNzljMDU2LTBmNWEtNDNlNC1iMzFmLWJlYTQ0MDE1YjIzNSIsImV4cCI6MTczMDQwMTM4MX0.dn9KzoXhmF8m4IjCHEwh6HKjpxSgNnCcVPa8bMjy9uc"
+        },
+        {
+            "email": "moderator@example.com",
+            "password": "moderatorpassword",
+            "role": "MODERATOR",
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTczMDQwMDQ2OCwianRpIjoiM2QwNzg3NmMtMjcxMC00YjZhLTkxZTEtNGM5YzlmZTI3OGFlIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ1c2VybmFtZSI6Im1vZGVyYXRvckBleGFtcGxlLmNvbSIsInJvbGUiOiJNT0RFUkFUT1IifSwibmJmIjoxNzMwNDAwNDY4LCJjc3JmIjoiNmRhNmEwOTQtZTgyYS00ZDhlLThiMDItMzgxMGUzYzM1YTU5IiwiZXhwIjoxNzMwNDAxMzY4fQ.LKdv8ivDVvrJ3R0ZIgJF3VqLzG4Dr0DKpDN8k2cPKGs"
+        }
+    ]
+}
