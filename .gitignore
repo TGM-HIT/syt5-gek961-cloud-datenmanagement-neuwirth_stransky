@@ -1,0 +1,11 @@
+# Python virtual environment
+.venv/
+
+# Python bytecode
+__pychache__/
+
+# JetBrains IDE
+.idea/
+
+# logs
+*.logs*
