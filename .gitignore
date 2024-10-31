@@ -1,11 +1,17 @@
 # Python virtual environment
 .venv/
+venv/
 
 # Python bytecode
-__pychache__/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
 # JetBrains IDE
-.idea/
+#.idea/
 
 # logs
-*.logs*
+*.log
+*.logs
+logs/
