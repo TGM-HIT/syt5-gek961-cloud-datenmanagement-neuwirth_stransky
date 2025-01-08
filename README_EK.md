@@ -62,6 +62,26 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=False)
 ```
 
+#### Rate-Limiting
+
+```python
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+# Flask-Limiter initialisieren
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["100 per minute"]
+)
+
+@app.route('/auth/signin', methods=['POST'])
+@limiter.limit("10 per minute")
+def signin():
+
+# Weiteres Rate-Limiting für Endpunkte hinzufügen
+```
+
 ## Bewertung
 Gruppengrösse: 1-2 Person(en)
 
@@ -81,3 +101,6 @@ Hier finden Sie das Abgabe-Repository zum Entwickeln und Commiten Ihrer Lösung.
 - [Django REST framework](https://www.django-rest-framework.org/)
 - [Eve. The Simple Way to REST](https://docs.python-eve.org/en/stable/)
 - [Heroku makes it easy to deploy and scale Java apps in the cloud](https://devcenter.heroku.com/articles/deploying-spring-boot-apps-to-heroku)
+
+https://flask-limiter.readthedocs.io/en/stable/
+https://martin-grellmann.de/regulaere-ausdruecke-regex-in-sql
