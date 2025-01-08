@@ -8,6 +8,7 @@ from flask_cors import CORS, cross_origin
 import json
 import os
 import time
+import re
 
 # Flask-App initialisieren
 app = Flask(__name__)
@@ -101,6 +102,11 @@ def hash_password(password):
 def check_password(stored_hash, password_to_check):
     return stored_hash == hash_password(password_to_check)
 
+# Email-Prüfung
+def is_valid_email(email):
+    email_regex = r'/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$/'
+    return re.match(email_regex, email) is not None
+
 
 # Registrierung (nur Administratoren können Benutzer registrieren)
 @app.route('/auth/admin/register', methods=['POST'])
@@ -114,6 +120,10 @@ def register():
     email = request.json.get('email')
     password = request.json.get('password')
     role = request.json.get('role', 'READER')
+
+    # Validate Input
+    if not is_valid_email(email):
+        return jsonify({'msg': 'Invalid email format!'}), 400
 
     if role not in ["ADMIN", "READER", "MODERATOR"]:
         role = "READER"
@@ -229,4 +239,4 @@ if __name__ == '__main__':
     create_default_admin()  # Erstelle Standard-Admin beim Start
     # Benutzer aus einer JSON-Datei beim Start laden
     load_users_from_json(USERS_JSON_PATH)
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', debug=False)
