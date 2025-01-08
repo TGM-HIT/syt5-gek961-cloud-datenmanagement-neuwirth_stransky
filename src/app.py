@@ -9,6 +9,8 @@ import json
 import os
 import time
 import re
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # Flask-App initialisieren
 app = Flask(__name__)
@@ -18,6 +20,13 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 # Secret keys
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'geheimnisvollesgeheimnis')
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'jwt_geheimnisvoll')
+
+# Flask-Limiter initialisieren
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["100 per minute"]
+)
 
 # JWT-Manager initialisieren
 jwt = JWTManager(app)
@@ -112,6 +121,7 @@ def is_valid_email(email):
 @app.route('/auth/admin/register', methods=['POST'])
 @cross_origin()
 @jwt_required()
+@limiter.limit("10 per minute")
 def register():
     current_user = get_jwt_identity()
     if current_user['role'] != 'ADMIN':
@@ -149,6 +159,7 @@ def register():
 
 # Login und JWT-Erstellung
 @app.route('/auth/signin', methods=['POST'])
+@limiter.limit("10 per minute")
 def signin():
     email = request.json.get('email')
     password = request.json.get('password')
@@ -209,6 +220,7 @@ def save_user_to_json(user_data, file_path='users.json'):
 @app.route('/auth/verify', methods=['GET'])
 @cross_origin()
 @jwt_required()
+@limiter.limit("10 per minute")
 def verify():
     current_user = get_jwt_identity()
     return jsonify({'msg': 'Token gueltig!', 'user': current_user}), 200
