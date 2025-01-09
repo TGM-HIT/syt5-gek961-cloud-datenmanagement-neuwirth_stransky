@@ -116,7 +116,7 @@ def check_password(stored_hash, password_to_check):
 
 # Email-Prüfung
 def is_valid_email(email):
-    email_regex = r'/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$/'
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(email_regex, email) is not None
 
 
@@ -126,7 +126,7 @@ def is_valid_email(email):
 @jwt_required()
 @limiter.limit("10 per minute")
 def register():
-    current_user = get_jwt_identity()
+    current_user = json.loads(get_jwt_identity())
     if current_user['role'] != 'ADMIN':
         return jsonify({'msg': 'Nur Administratoren koennen Benutzer registrieren!'}), 403
 
@@ -172,7 +172,7 @@ def signin():
         user = cursor.fetchone()
 
         if user and check_password(user[2], password):
-            access_token = create_access_token(identity={'username': user[1], 'role': user[3]})
+            access_token = create_access_token(identity=json.dumps({'username': user[1], 'role': user[3]}))
             # Speichern des Benutzers in users.json
             user_data = {
                 'email': email,
