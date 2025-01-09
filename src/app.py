@@ -236,7 +236,7 @@ def create_default_admin():
         # Erstelle nur einen Admin, wenn keiner existiert
         if not existingadmin:
             email = "admin@example.com"
-            raw_password = "adminpass" + "1KASmdfsjeWiud/§"  # Salt hinzufügen
+            raw_password = "adminpass"
             hashed_password = hash_password(raw_password)
             role = "ADMIN"
 
