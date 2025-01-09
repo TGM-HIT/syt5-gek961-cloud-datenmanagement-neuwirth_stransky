@@ -11,6 +11,7 @@ import time
 import re
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from bcrypt import hashpw, gensalt, checkpw
 
 # Flask-App initialisieren
 app = Flask(__name__)
@@ -104,12 +105,12 @@ def load_users_from_json(file_path):
 
 # Passwort hash-Funktion
 def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
+    return hashpw(password.encode(), gensalt()).decode()
 
 
 # Passwort-Prüfung
 def check_password(stored_hash, password_to_check):
-    return stored_hash == hash_password(password_to_check)
+    return checkpw(password_to_check.encode(), stored_hash.encode())
 
 # Email-Prüfung
 def is_valid_email(email):
