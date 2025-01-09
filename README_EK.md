@@ -82,6 +82,18 @@ def signin():
 # Weiteres Rate-Limiting für Endpunkte hinzufügen
 ```
 
+#### Passwort-Hashing
+
+```python
+from bcrypt import hashpw, gensalt, checkpw
+
+def hash_password(password):
+    return hashpw(password.encode(), gensalt()).decode()
+
+def check_password(stored_hash, password_to_check):
+    return checkpw(password_to_check.encode(), stored_hash.encode())
+```
+
 ## Bewertung
 Gruppengrösse: 1-2 Person(en)
 
