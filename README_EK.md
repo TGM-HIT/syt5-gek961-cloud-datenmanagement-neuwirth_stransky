@@ -1,13 +1,16 @@
 # EK9.6 Middleware Engineering "Cloud-Datenmanagement" - Taskdescription
 
 ## Einführung
+
 Diese Übung zeigt die Anwendung von verteilten Webservices an einer simplen Anforderung.
 
 ## Ziele
+
 Das Ziel dieser Übung ist eine Webanbindung zur Benutzeranmeldung umzusetzen. Dabei soll sich ein Benutzer registrieren und am System anmelden können.
 Die Kommunikation zwischen Client und Service soll mit Hilfe einer REST Schnittstelle umgesetzt werden.
 
 ## Kompetenzzuordnung
+
 EK SYT9 Dezentrale Systeme | Middleware Engineering | Serviceorientiert
 "Sicherheitskonzepte für serviceorientierte Architekturen konzipieren"
 "Konzepte anhand eines Webservices umsetzen"
@@ -24,24 +27,60 @@ Es ist ein Webservice zu implementieren, welches eine einfache Benutzerverwaltun
 ## Erweiterungen
 
 ### Sicherheitsüberlegungen
+
 Die REST-Schnittstelle ist schnell und einfach aufgesetzt und ist meist durch Frameworks auch leicht zu erweitern. Bei der Implementierung von neuen Funktionalitäten vergisst man aber schnell auf die notwendige Absicherung von verbreiteten Angriffsvektoren. Welche sind diese? Wie kann zum Beispiel die funktionale Anforderung der Registrierung und des Logins von der Datenhaltung getrennt und abgesichert werden? Ist dies sinnvoll?
 
 Wie können die Eingabe und Übermittlung einfach und schnell sicherer gestaltet werden? Welche Services kommen hierzu verbreitet zum Einsatz?
 
 ### Regressions-Tests
+
 Die erfolgreiche Implementierung soll mit entsprechenden Testfällen (Acceptance-Tests bez. aller funktionaler Anforderungen mittels Unit-Tests) dokumentiert werden. Testberichte sind auch dazu da, eine fortgehende Implementierung bzw. eine fehlerhafte Implementierung aufzuzeigen. Nutzen Sie diese!
 
 ## Abgabe
+
 Die entsprechenden Konfigurationsdateien und Deployment-Anweisungen sind im README.md festzuhalten. Etwaiger Programmcode ist ebenfalls zu dokumentieren. Implementierungen müssen entsprechend beschrieben und leicht deployable sein!
 
 ## Umsetzung
 
 ### Angriffsvektoren
+
 #### SQL-Injection
+
 #### Unsichere Speicherung von User Credentials
+
 #### Brute-Force-Attacken
 
+#### Email Verification
+
+Erstellung einer gmail Adresse und erstellung eines App Passwortes unter Google Account > Security > App Password
+
+Erstellung eines Config Files mit mail server, username, password, port, TLS, SSL
+
+flask_mail importieren , um Emails zu schicken
+itsdangerous importieren (URLSafeTimedSerializer) um Strings mit einem Secret zu serialisieren
+
+serializer = URLSafeTimedSerializer('secret')
+
+Token erstellen mittels token = serializer.dumps(email, salt='secret')
+
+neue route erstellen, für den confirmation link
+
+```python
+@app.route('/confirm_email/<token>')
+def confirm_email(token):
+    try:
+        email = serializer.loads(token, salt='secret', max_age=60)
+    except SignatureExpired:
+        return 'The token is expired'
+    return 'The token works'
+```
+
+Statt token is expired und token works muss man anschließend die Logik zur confirmation einbauen, z.B. in der Datenbank confirm_email auf True setzen
+
+https://www.youtube.com/watch?v=vF9n248M1yk&ab_channel=PrettyPrinted
+
 ### Gegenmaßnahmen
+
 #### Input Validation (z.B. regex)
 
 ```python
@@ -95,16 +134,21 @@ def check_password(stored_hash, password_to_check):
 ```
 
 ## Bewertung
+
 Gruppengrösse: 1-2 Person(en)
 
-###  Erweiterte Anforderungen überwiegend erfüllt
+### Erweiterte Anforderungen überwiegend erfüllt
+
 Umsetzung von erweiterten Sicherheitsrichtlinien
+
 ### Erweiterte Anforderungen zur Gänze erfüllt
+
 Überprüfung der funktionalen Anforderungen mittels Regressionstests
 Classroom Repository
 Hier finden Sie das Abgabe-Repository zum Entwickeln und Commiten Ihrer Lösung.
 
 ## Quellen
+
 - [Android Restful Webservice Tutorial – Introduction to RESTful webservice – Part 1](https://www.androidhive.info/2014/05/android-working-with-volley-library-1/)
 - [Registration and Login Example with Spring Boot, Spring Security, Spring Data JPA, and HSQL](https://www.codejava.net/frameworks/spring-boot/user-registration-and-login-tutorial)
 - [Getting Started with Couchbase and Spring Data Couchbase](https://spring.io/blog/2015/03/16/getting-started-with-couchbase-and-spring-data-couchbase)
