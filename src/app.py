@@ -3,7 +3,6 @@ from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 import mysql.connector
 from mysql.connector import Error
-import hashlib
 from flask_cors import CORS, cross_origin
 import json
 import os
@@ -61,6 +60,7 @@ conn, cursor = connect_to_db_with_retries()
 
 # Path to users.json (from environment or default to 'users.json' in the current directory)
 USERS_JSON_PATH = os.getenv('USERS_JSON_PATH', 'users.json')
+print(USERS_JSON_PATH)
 
 # Ensure the users.json file exists
 if not os.path.exists(USERS_JSON_PATH):
@@ -71,6 +71,7 @@ if not os.path.exists(USERS_JSON_PATH):
 # Benutzer aus JSON-Datei laden und initial in Datenbank einfügen
 def load_users_from_json(file_path):
     if os.path.exists(file_path):
+        print(f"Loading users from {file_path}...")
         with open(file_path, 'r') as file:
             users = json.load(file)
 
@@ -92,7 +93,7 @@ def load_users_from_json(file_path):
                     print(f"Skipping user {email} due to missing password.")
                     continue  # Skip this user if the password is missing
 
-                raw_password = password + "1KASmdfsjeWiud/§"
+                raw_password = password
                 hashed_password = hash_password(raw_password)
                 role = user.get('role', 'READER')
                 try:
@@ -111,6 +112,7 @@ def hash_password(password):
 # Passwort-Prüfung
 def check_password(stored_hash, password_to_check):
     return checkpw(password_to_check.encode(), stored_hash.encode())
+
 
 # Email-Prüfung
 def is_valid_email(email):
@@ -139,7 +141,7 @@ def register():
     if role not in ["ADMIN", "READER", "MODERATOR"]:
         role = "READER"
 
-    raw_password = password + "1KASmdfsjeWiud/§"
+    raw_password = password
     hashed_password = hash_password(raw_password)
 
     try:
@@ -164,13 +166,12 @@ def register():
 def signin():
     email = request.json.get('email')
     password = request.json.get('password')
-    password_salted = password + "1KASmdfsjeWiud/§"
 
     try:
         cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
         user = cursor.fetchone()
 
-        if user and check_password(user[2], password_salted):
+        if user and check_password(user[2], password):
             access_token = create_access_token(identity={'username': user[1], 'role': user[3]})
             # Speichern des Benutzers in users.json
             user_data = {
@@ -230,26 +231,40 @@ def verify():
 # Default-Admin erstellen
 def create_default_admin():
     try:
+        # Prüfen, ob ein Admin bereits existiert
         cursor.execute("SELECT * FROM users WHERE role = 'ADMIN'")
-        existingadmin = cursor.fetchone()
+        existing_admin = cursor.fetchone()
 
         # Erstelle nur einen Admin, wenn keiner existiert
-        if not existingadmin:
+        if not existing_admin:
             email = "admin@example.com"
             raw_password = "adminpass"
+
+            # Passwort-Hash mit bcrypt erstellen
             hashed_password = hash_password(raw_password)
+
             role = "ADMIN"
 
+            # Admin in die Datenbank einfügen
             cursor.execute("INSERT INTO users (email, password, role) VALUES (%s, %s, %s)",
                            (email, hashed_password, role))
             conn.commit()
-            print(f"Default admin user created with email '{email}' and password 'adminpass'.")
+
+            print(f"Default admin user created with email '{email}' and password '{raw_password}'.")
+        else:
+            print("Admin user already exists.")
     except Error as e:
         print(f"Error during default admin creation: {e}")
 
 
 if __name__ == '__main__':
+    print("Starting the application...")
     create_default_admin()  # Erstelle Standard-Admin beim Start
     # Benutzer aus einer JSON-Datei beim Start laden
     load_users_from_json(USERS_JSON_PATH)
-    app.run(host='0.0.0.0', debug=False)
+
+    # Force debug mode
+    app.config['ENV'] = 'development'
+    app.config['DEBUG'] = True  # Enable debug mode explicitly
+
+    app.run(host='0.0.0.0', debug=True)
